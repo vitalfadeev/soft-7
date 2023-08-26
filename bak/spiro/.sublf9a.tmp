@@ -1,0 +1,518 @@
+module cls.spiro.spiro;
+
+import bindbc.sdl;
+import cls.o;
+import colors : Pal, SDL_SetRenderDrawColorStruct;
+import types;
+import wrappers;
+import std.stdio : writeln;
+
+struct Spiro
+{
+    mixin OMixin!O;
+
+    static
+    void Draw( O* o, Renderer* renderer, Size drawSize )
+    {
+        Init._DrawBackground( o, renderer );
+        //_DrawSpiro( o, renderer );
+        //_DrawCircle2( o, renderer );
+        //_DrawCircle4( o, renderer );
+        _DrawCircle5( o, renderer );
+
+        // recursive
+        DrawRecursive( o, renderer, drawRect );
+    }
+
+
+    static
+    void _DrawSpiro( O* o, Renderer* renderer )
+    {
+        auto x = o.x;
+        auto y = o.y;
+        auto w = o.w;
+        auto h = o.h;
+
+        auto x1 = x * gridsize;
+        auto y1 = y * gridsize;
+        auto x2 = (x+w) * gridsize;
+        auto y2 = (y+h) * gridsize;
+
+        int cx = x1 + (x2-x1)/2;
+        int cy = y1 + (y2-y1)/2;
+        int r = 50;
+
+        SDL_SetRenderDrawColorStruct( renderer, o.fg );
+        //Circle( renderer, cx, cy, r );
+        DrawSpiro( renderer, cx, cy, r );
+    }
+
+
+    static
+    void _DrawCircle2( O* o, Renderer* renderer )
+    {
+        auto x = o.x;
+        auto y = o.y;
+        auto w = o.w;
+        auto h = o.h;
+
+        auto x1 = x * gridsize;
+        auto y1 = y * gridsize;
+        auto x2 = (x+w) * gridsize;
+        auto y2 = (y+h) * gridsize;
+
+        int cx = x1 + (x2-x1)/2;
+        int cy = y1 + (y2-y1)/2;
+        int r = 50;
+
+        SDL_SetRenderDrawColorStruct( renderer, o.fg );
+        Circle2( renderer, cx, cy, r );
+    }
+
+    static
+    void _DrawCircle3( O* o, Renderer* renderer )
+    {
+        auto x = o.x;
+        auto y = o.y;
+        auto w = o.w;
+        auto h = o.h;
+
+        auto x1 = x * gridsize;
+        auto y1 = y * gridsize;
+        auto x2 = (x+w) * gridsize;
+        auto y2 = (y+h) * gridsize;
+
+        int cx = x1 + (x2-x1)/2;
+        int cy = y1 + (y2-y1)/2;
+        int r = 50;
+
+        SDL_SetRenderDrawColorStruct( renderer, o.fg );
+        Circle3( renderer, cx, cy, r );
+    }
+
+    static
+    void _DrawCircle4( O* o, Renderer* renderer )
+    {
+        auto x = o.x;
+        auto y = o.y;
+        auto w = o.w;
+        auto h = o.h;
+
+        auto x1 = x * gridsize;
+        auto y1 = y * gridsize;
+        auto x2 = (x+w) * gridsize;
+        auto y2 = (y+h) * gridsize;
+
+        int cx = x1 + (x2-x1)/2;
+        int cy = y1 + (y2-y1)/2;
+        int r = 50;
+
+        SDL_SetRenderDrawColorStruct( renderer, o.fg );
+        Circle4( renderer, cx, cy, r );
+        //Spiro4( renderer, cx, cy, r );
+    }
+
+    static
+    void _DrawCircle5( O* o, Renderer* renderer )
+    {
+        auto x = o.x;
+        auto y = o.y;
+        auto w = o.w;
+        auto h = o.h;
+
+        auto x1 = x * gridsize;
+        auto y1 = y * gridsize;
+        auto x2 = (x+w) * gridsize;
+        auto y2 = (y+h) * gridsize;
+
+        int cx = x1 + (x2-x1)/2;
+        int cy = y1 + (y2-y1)/2;
+        int r = ( w <= h ) ? w*gridsize/2 : h*gridsize/2;
+
+        SDL_SetRenderDrawColorStruct( renderer, o.fg );
+        Spiro5( renderer, cx, cy, r );
+    }
+}
+
+void Circle( Renderer* renderer, int cx, int cy, int r )
+{
+    int x;
+    int y = r;
+    int delta = 1 - 2 * r;
+    int error = 0;
+
+    while ( y >= x )
+    {
+        Drawpixel( renderer, cx + x, cy + y );
+        Drawpixel( renderer, cx + x, cy - y );
+        Drawpixel( renderer, cx - x, cy + y );
+        Drawpixel( renderer, cx - x, cy - y );
+        Drawpixel( renderer, cx + y, cy + x );
+        Drawpixel( renderer, cx + y, cy - x );
+        Drawpixel( renderer, cx - y, cy + x );
+        Drawpixel( renderer, cx - y, cy - x );
+
+        error = 2 * (delta + y) - 1;
+
+        if ( (delta < 0) && (error <= 0) )
+        {
+            x++;
+            delta += (2 * x + 1);
+            continue;
+        }
+
+        if ( (delta > 0) && (error > 0) )
+        {
+            y--;
+            delta -= (2 * y + 1);
+            continue;
+        }
+
+        x++;
+        y--;
+        delta += (2 * (x - y));
+    }
+}
+
+pragma( inline, true )
+void Drawpixel( Renderer* renderer, int x, int y )
+{
+    SDL_RenderDrawPoint( renderer, x , y );
+}
+
+
+void Circle2( Renderer* renderer, int xc, int yc, int r )
+{  
+    int x  = 0;  
+    int y  = r;  
+    int Dd = 2*(1-r);
+    int z;
+
+    while ( x < r )
+    {
+        Drawpixel2( renderer, xc, yc, x, y );
+
+        if ( !Dd ) 
+            goto D; // /
+
+        z = 2*Dd - 1;
+        
+        if ( Dd > 0 )
+        {
+            if ( z + 2*x <= 0 )
+                goto D; // /
+            else 
+                goto V; // |
+        }
+
+        if ( z + 2*y > 0 )
+            goto D; // /
+
+H:   ++x;      Dd= Dd + 2*x + 1;   continue; // -
+D:   ++x; --y; Dd= Dd + 2*(x-y+1); continue; // /
+V:   --y;      Dd= Dd - 2*y + 1;             // |
+    }
+
+    if ( x == r )
+        Drawpixel2( renderer, xc, yc, x, y );
+}
+
+pragma( inline, true )
+static void Drawpixel2 ( Renderer* renderer, int xc, int yc, int x, int y )
+{
+   SDL_RenderDrawPoint( renderer, xc+x, yc+y );
+   //SDL_RenderDrawPoint( renderer, xc+y, yc+x );
+   //SDL_RenderDrawPoint( renderer, xc+y, yc-x );
+   //SDL_RenderDrawPoint( renderer, xc+x, yc-y );
+   //SDL_RenderDrawPoint( renderer, xc-x, yc-y );
+   //SDL_RenderDrawPoint( renderer, xc-y, yc-x );
+   //SDL_RenderDrawPoint( renderer, xc-y, yc+x );
+   //SDL_RenderDrawPoint( renderer, xc-x, yc+y );
+}
+
+
+void Circle3( Renderer* renderer, int cx, int cy, int r )
+{  
+    import std.conv;
+
+    float x  = r;  
+    float y  = 0;
+    float PI = 3.1415926;
+
+    float l = 2*PI*r/4;
+    float delta = r/l;
+
+    // x/y = 1 = l/2;
+    // l/2 = 1
+    // x/y = 1
+    // y = 1/x
+
+    // X = R  0   X/Y = R .. 0
+    // Y = 0  R   Y/X = 0 .. R
+    //
+    // L / 2
+    // 2 PI R / 8   X = Y   X/Y = 1
+    //             dX = dY  dX/dY = 1
+    float k;
+
+    // dx = 0..1 = R/L
+    // dy = 0..1
+
+    // За  2 PI R / 4  X должен стать 0
+    // За  2 PI R / 4  Y должен стать R
+    // На  L / 2  X = Y
+
+    // step  = R/L
+
+    for ( int i=0; i<l; i++ )
+    {
+        Drawpixel3( renderer, cx, cy, x.to!int, y.to!int );
+    }
+
+}
+
+pragma( inline, true )
+static void Drawpixel3( Renderer* renderer, int cx, int cy, int x, int y )
+{
+   SDL_RenderDrawPoint( renderer, cx+x, cy+y );
+}
+
+
+void Circle4( Renderer* renderer, int cx, int cy, int r )
+{  
+    import std.conv;
+    import std.math : PI;
+    import std.math : cos, sin;
+
+    struct Pointf
+    {
+        float x;
+        float y;
+
+        Pointf normal()
+        {
+            Pointf n = Pointf( y, x ) + this;
+            return n;
+        }
+
+        Pointf opBinary( string op : "+" )( Pointf b )
+        {
+            return Pointf( x + b.x, y + b.y );
+        }
+
+        // r = ox2 cos α + oy2 sin α
+        Pointf Rotate( float angle )
+        {
+            import std.math : cos, sin;
+
+            float c = cos( angle );
+            float s = sin( angle );
+
+            return 
+                Pointf( 
+                    x * c - y * s, 
+                    y * c + x * s 
+                );
+        }
+    }
+
+    // L = 2 PI R
+    // L iterations
+    // Rotate to angle = 2 PI / L
+    // L rotations
+    alias R = r;
+    float L = 2 * PI * R;
+    float angle = 2 * PI / L;
+    float x = r;
+    float y = 0;
+    float c = cos( angle );
+    float s = sin( angle );
+    float nx;
+    float ny;
+
+    for ( int i=0; i < L; i++ )
+    {
+        //Drawpixel4( renderer, cx, cy, x.to!int, y.to!int );
+
+        nx = x * c - y * s;
+        ny = y * c + x * s;
+        x = nx;
+        y = ny;
+    }
+}
+
+
+
+//
+struct Point(T)
+{
+    T x;
+    T y;
+
+    Point!T Normal()
+    {
+        return Point!T( -y, x );
+    }
+
+    T L()
+    {
+        import std.math : sqrt, pow;
+        return sqrt( pow(x,2) + pow(y,2) );
+    }
+
+    Point!T opBinary( string op : "+" )( Point!T b )
+    {
+        return Point!T( x + b.x, y + b.y );
+    }
+
+    Point!T opBinary( string op : "*" )( T l )
+    {
+        return Point!T( x * l, y * l );
+    }
+
+    Point!T opBinary( string op : "/" )( T l )
+    {
+        return Point!T( x / l, y / l );
+    }
+
+    // r = ox2 cos α + oy2 sin α
+    Point!T Rotate( T angle )
+    {
+        import std.math : cos, sin;
+
+        T c = cos( angle );
+        T s = sin( angle );
+
+        return 
+            Point!T( 
+                x * c - y * s, 
+                y * c + x * s 
+            );
+    }
+
+    Point!T Normalize()
+    {
+        T l = L();
+        return Point!T( x / l, y / l );
+    }
+
+    TX x_to(TX)()
+    {
+        import std.math : round;
+        import std.conv : to;
+        return x.round().to!TX;
+    }
+
+    TY y_to(TY)()
+    {
+        import std.math : round;
+        import std.conv : to;
+        return y.round().to!TY;
+    }
+
+    int intx()
+    {
+        return x_to!int;
+    }
+
+    int inty()
+    {
+        return y_to!int;
+    }
+}
+
+void Spiro5( Renderer* renderer, int cx, int cy, int r )
+{  
+    import std.conv;
+    import std.math : PI;
+    import std.math : cos, sin;
+
+    // L = 2 PI R
+    // L iterations
+    // Rotate to angle = 2 PI / L
+    // L rotations
+    alias T = real;
+    alias R = r+0.5;
+    T L = 2 * PI * R;
+    T angle = 2 * PI / L; // 1 / R
+    T c = cos( angle );
+    T s = sin( angle );
+
+    auto A = Point!T( R+0.5, 0+0.5 );
+
+    // A x,y
+    // AB = l
+    // B = A + A.norm * l * angle
+    for ( int i=0; i < L; i++ )
+    {
+        Drawpixel5!T( renderer, cx, cy, A );
+
+        A = A + A.Normalize().Normal().Rotate( angle );
+    }
+}
+
+pragma( inline, true )
+static void Drawpixel5(T)( Renderer* renderer, int cx, int cy, Point!T A )
+{
+    SDL_RenderDrawPoint( renderer, cx+A.intx, cy+A.inty );
+}
+
+
+
+
+void Arc( Renderer* renderer, int cx, int cy, int x1, int y1, int x2, int y2 )
+{
+    //
+}
+
+
+void DrawSpiro( Renderer* renderer, int cx, int cy, int r )
+{
+    //  3 | 2
+    // ---+---
+    //  4 | 1
+    import std.math;
+    import std.conv;
+
+    int x = 0;
+    int y = r;
+
+    int rr = r*r;
+    int xx = x*x;
+    int yy = y*y;
+
+L0: // X=R Y=0
+    Drawpixel( renderer, cx + x, cy + y );
+
+L1: // 0 < Y < X <= R
+    while ( x > y )
+    {
+        Drawpixel( renderer, cx + x, cy + y );
+
+        y++;
+        yy = y*y;
+        while ( xx + yy > rr )
+        {
+            x--;
+            xx = xx*xx;
+        }
+    }
+
+L2: // X = Y
+    Drawpixel( renderer, cx + x, cy + y );
+
+L3: // 0 < X < Y
+    while ( x > 0 )
+    {
+        Drawpixel( renderer, cx + x, cy + y );
+
+        x--;
+        xx = x*x;
+        while ( xx + yy > rr )
+        {
+            y--;
+            y = yy*yy;
+        }
+    }
+}
+

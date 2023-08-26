@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/ui
+soft6.so
+soft6.dylib
+soft6.dll
+soft6.a
+soft6.lib
+soft6-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst
