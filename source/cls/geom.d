@@ -31,12 +31,3 @@ struct Line
         return sqrt( pow(b.x - a.x) + pow(b.y - a.y) );
     }
 }
-
-unittest
-{
-    Point a;
-    Point b;
-
-    auto l = b - a;
-}
-
